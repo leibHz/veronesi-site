@@ -1,0 +1,42 @@
+@import url('[https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap)');
+
+:root {
+    --cor-primaria: #2563EB; /* Azul */
+    --cor-secundaria: #DC2626; /* Vermelho */
+    --cor-fundo: #F9FAFB;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--cor-fundo);
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="20" height="20" style="font-size:20px;"><text y="18">🛒</text></svg>') 4 4, auto;
+}
+
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: var(--cor-primaria); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #1D4ED8; }
+
+.filter-btn { padding: 8px 12px; border-radius: 6px; border: 1px solid transparent; background-color: transparent; font-weight: 500; color: #374151; transition: all 0.2s ease-in-out; }
+.filter-btn:hover { background-color: #EFF6FF; }
+.filter-btn.active { background-color: var(--cor-primaria); color: white; }
+
+.tag-btn { padding: 6px 14px; border-radius: 9999px; border: 1px solid #D1D5DB; background-color: white; font-weight: 500; color: #4B5563; transition: all 0.2s ease-in-out; cursor: pointer; }
+.tag-btn:hover { background-color: #F3F4F6; border-color: #9CA3AF; }
+.tag-btn.active { background-color: var(--cor-secundaria); color: white; border-color: var(--cor-secundaria); }
+
+.product-card { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 1rem; overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); }
+.product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); }
+
+.loader { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid var(--cor-secundaria); border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+#status-mercado.aberto .w-2 { background-color: #22C55E; }
+#status-mercado.aberto { color: #166534; background-color: #DCFCE7; }
+#status-mercado.fechado .w-2 { background-color: #EF4444; }
+#status-mercado.fechado { color: #991B1B; background-color: #FEE2E2; }
+
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; transition: opacity 0.3s ease; }
+.modal-overlay.hidden { display: none; }
+.modal-content { background-color: white; padding: 2rem; border-radius: 0.75rem; width: 100%; max-width: 420px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); }
+.modal-content.\!max-w-2xl { max-width: 672px; }

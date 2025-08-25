@@ -1,0 +1,84 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supermercado Veronesi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-50 font-sans">
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <a href="#" class="text-2xl font-bold text-red-600">Veronesi</a>
+                <div id="status-mercado" class="flex items-center gap-2 text-sm font-medium px-3 py-1 rounded-full">
+                    <span class="w-2 h-2 rounded-full"></span>
+                    <span id="status-texto">Carregando...</span>
+                </div>
+            </div>
+            <div class="relative w-full max-w-lg">
+                <input type="search" id="search-input" placeholder="O que você procura hoje?" class="w-full pl-10 pr-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></div>
+            </div>
+            <div id="user-actions" class="flex items-center gap-4">
+                <button id="login-btn-public" class="text-gray-600 hover:text-blue-600 transition font-medium">Entrar / Cadastrar</button>
+                <div id="user-menu" class="hidden items-center gap-4">
+                    <button id="my-account-btn" class="text-gray-600 hover:text-blue-600 transition font-medium">Minha Conta</button>
+                    <span class="text-gray-300">|</span>
+                    <span class="font-medium text-gray-700">Olá, <span id="user-name"></span>!</span>
+                    <button id="logout-btn" class="text-red-500 hover:text-red-700 font-semibold">Sair</button>
+                </div>
+                <button id="encomendar-btn" class="bg-blue-600 text-white px-5 py-2 rounded-full font-semibold hover:bg-blue-700 transition shadow-md flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                    <span id="cart-count" class="bg-red-500 text-xs text-white rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                </button>
+            </div>
+        </nav>
+    </header>
+    <main class="container mx-auto px-4 py-8">
+        <section class="bg-gradient-to-r from-red-500 to-red-700 text-white p-8 rounded-2xl mb-8 shadow-lg"><h1 class="text-4xl font-bold mb-2">Ofertas da Semana!</h1><p class="text-lg">Produtos selecionados com preços que você não vai acreditar.</p></section>
+        
+        <div class="flex flex-col md:flex-row gap-8">
+            <aside class="w-full md:w-1/4 lg:w-1/5">
+                <div class="space-y-6 bg-white p-4 rounded-lg shadow-sm">
+                    <div>
+                        <h3 class="font-semibold text-gray-800 mb-3 border-b pb-2">Categorias</h3>
+                        <div id="filtros-sessoes" class="flex flex-col items-start gap-1">
+                             <button class="filter-btn active w-full text-left" data-sessao-id="all">Todas</button>
+                             <button class="filter-btn w-full text-left" data-sessao-id="1">Padaria</button>
+                             <button class="filter-btn w-full text-left" data-sessao-id="2">Açougue</button>
+                             <button class="filter-btn w-full text-left" data-sessao-id="3">Hortifrúti</button>
+                             <button class="filter-btn w-full text-left" data-sessao-id="4">Bebidas</button>
+                             <button class="filter-btn w-full text-left" data-sessao-id="5">Limpeza</button>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800 mb-3 border-b pb-2">Tags</h3>
+                        <div id="filtros-tags" class="flex flex-wrap items-start gap-2">
+                            <span class="text-sm text-gray-500">Carregando tags...</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <div class="w-full md:w-3/4 lg:w-4/5">
+                <div class="mb-4 flex justify-between items-center">
+                    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="promocao-filter" class="form-checkbox h-5 w-5 text-red-600 rounded"><span class="text-gray-700 font-medium">Apenas promoções</span></label>
+                    <select id="sort-select" class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"><option value="nome_asc">Ordem Alfabética (A-Z)</option><option value="nome_desc">Ordem Alfabética (Z-A)</option><option value="preco_asc">Preço (Menor para Maior)</option><option value="preco_desc">Preço (Maior para Menor)</option></select>
+                </div>
+                <section id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div id="loading-spinner" class="col-span-full flex justify-center items-center py-16"><div class="loader"></div></div>
+                </section>
+            </div>
+        </div>
+    </main>
+    <footer class="bg-gray-800 text-white mt-12"><div class="container mx-auto px-4 py-8 text-center"><p>&copy; 2024 Supermercado Veronesi. Todos os direitos reservados.</p><p class="text-sm text-gray-400">Desenvolvido com carinho para a comunidade.</p></div></footer>
+    <div id="auth-modal" class="modal-overlay hidden"><div class="modal-content"><div id="auth-content"></div></div></div>
+    <div id="cart-modal" class="modal-overlay hidden"><div id="cart-content" class="modal-content !max-w-2xl"></div></div>
+    <div id="orders-modal" class="modal-overlay hidden"><div id="orders-content" class="modal-content !max-w-4xl"></div></div>
+    <script src="script.js"></script>
+</body>
+</html>
