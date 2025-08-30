@@ -1,45 +1,17 @@
 <?php
-// api/config.php
+// ARQUIVO: api/config.php
+// -----------------------------------------------------------------
+// Este arquivo agora contém as configurações para a API REST do Supabase.
+// A chave secreta (service_role) é usada aqui para operações de backend,
+// pois ela pode contornar as políticas de segurança de linha (RLS),
+// o que é necessário para um servidor de aplicação confiável.
 
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
+// URL do seu projeto Supabase
+$supabase_url = 'https://atlevvcnquxtczsksuyv.supabase.co';
 
-require_once '../db_connect.php';
+$supabase_publishable_key = 'sb_publishable_ZNV55bP_klSoZ6mB92YopQ_TIHjpRYO';
 
-try {
-    $stmt = $pdo->query("SELECT * FROM configuracoes_site WHERE id = 1");
-    $config = $stmt->fetch();
+// Chave de API Secreta (Service Role) - Mantenha esta chave segura e nunca a exponha no frontend.
+$supabase_secret_key = 'sb_secret_kntnItGKTuNhJkEBPZmOkw_HWPTTf3D'; 
 
-    if ($config) {
-        date_default_timezone_set('America/Sao_Paulo');
-        $agora = time();
-        $abertura = strtotime($config['horario_abertura']);
-        $fechamento = strtotime($config['horario_fechamento']);
-        
-        $status_texto = "Fechado";
-        $cor_status = "red";
-
-        if ($config['status_manual'] === 'aberto_manual') {
-            $status_texto = !empty($config['mensagem_status']) ? $config['mensagem_status'] : "Aberto";
-            $cor_status = "green";
-        } elseif ($config['status_manual'] === 'fechado_manual') {
-            $status_texto = !empty($config['mensagem_status']) ? $config['mensagem_status'] : "Fechado";
-            $cor_status = "red";
-        } else {
-            if ($agora >= $abertura && $agora <= $fechamento) {
-                $status_texto = "Aberto agora";
-                $cor_status = "green";
-            }
-        }
-        
-        $config['status_calculado'] = ['texto' => $status_texto, 'cor' => $cor_status];
-    }
-
-    echo json_encode($config);
-
-} catch (PDOException $e) {
-    http_response_code(500);
-    error_log($e->getMessage());
-    echo json_encode(['error' => 'Erro ao buscar configurações do site.']);
-}
 ?>

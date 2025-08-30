@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações - Supermercado Veronesi</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kit.fontawesome.com/cc533e21e1.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="admin-wrapper">
+        <aside class="sidebar">
+            <h1 class="sidebar-logo">S. Veronesi</h1>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></a>
+                <a href="encomendas.html" class="nav-item"><i class="fa-solid fa-box-archive"></i><span>Encomendas</span></a>
+                <a href="produtos.html" class="nav-item"><i class="fa-solid fa-tags"></i><span>Produtos</span></a>
+                <a href="#" class="nav-item"><i class="fa-solid fa-users"></i><span>Clientes</span></a>
+                <a href="configuracoes.html" class="nav-item active"><i class="fa-solid fa-gear"></i><span>Configurações</span></a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="content-header">
+                <button class="menu-toggle"><i class="fa-solid fa-pencil"></i></button>
+                <h2>Configurações do Site</h2>
+            </header>
+            
+            <section class="settings-form-container">
+                <form id="settingsForm">
+                    <h3>Horários de Funcionamento</h3>
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label for="horario_seg_sex_abre">Seg a Sex (Abertura)</label>
+                            <input type="time" id="horario_seg_sex_abre" name="horario_seg_sex_abre">
+                        </div>
+                        <div class="input-group">
+                            <label for="horario_seg_sex_fecha">Seg a Sex (Fechamento)</label>
+                            <input type="time" id="horario_seg_sex_fecha" name="horario_seg_sex_fecha">
+                        </div>
+                        <div class="input-group">
+                            <label for="horario_sab_abre">Sábados (Abertura)</label>
+                            <input type="time" id="horario_sab_abre" name="horario_sab_abre">
+                        </div>
+                        <div class="input-group">
+                            <label for="horario_sab_fecha">Sábados (Fechamento)</label>
+                            <input type="time" id="horario_sab_fecha" name="horario_sab_fecha">
+                        </div>
+                    </div>
+
+                    <h3 style="margin-top: 30px;">Sistema de Encomendas</h3>
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <!-- CORREÇÃO: Alterado o 'name' e 'id' para 'status_manual' -->
+                            <label for="status_manual">Status da Loja</label>
+                            <select id="status_manual" name="status_manual">
+                                <option value="auto">Automático (pelo horário)</option>
+                                <option value="aberto">Forçar Aberto</option>
+                                <option value="fechado">Forçar Fechado</option>
+                            </select>
+                        </div>
+                        <div class="input-group-inline">
+                            <label for="encomendas_ativas">Ativar serviço de encomendas?</label>
+                            <label class="switch">
+                                <input type="checkbox" id="encomendas_ativas" name="encomendas_ativas">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="input-group" style="margin-top: 20px;">
+                        <!-- CORREÇÃO: Alinhado nome da coluna com o banco (mensagem_status) -->
+                        <label for="mensagem_status">Mensagem (quando desativado)</label>
+                        <input type="text" id="mensagem_status" name="mensagem_status" placeholder="Ex: Voltamos em breve!">
+                    </div>
+
+                    <div style="text-align: right; margin-top: 30px;">
+                        <button type="submit" class="btn-primary">Salvar Configurações</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="configuracoes.js"></script>
+    <script>
+        document.querySelector('.menu-toggle').addEventListener('click', () => {
+            document.querySelector('.sidebar').classList.toggle('open');
+        });
+    </script>
+</body>
+</html>

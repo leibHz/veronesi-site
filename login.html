@@ -1,0 +1,96 @@
+<!-- ARQUIVO: login.html (coloque na pasta raiz do projeto) -->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrar - Supermercado Veronesi</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Estilos adicionais para a página de login -->
+    <style>
+        .auth-body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .auth-container {
+            background-color: var(--surface-color);
+            padding: 40px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        .auth-container h2 {
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+        }
+        .input-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-secondary);
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+        .auth-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            background-color: var(--primary-red);
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            height: 48px;
+        }
+        .auth-link {
+            margin-top: 20px;
+            color: var(--text-secondary);
+        }
+        .auth-link a {
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+        .error-message {
+            color: var(--primary-red);
+            margin-top: 15px;
+            min-height: 20px;
+        }
+    </style>
+</head>
+<body class="auth-body">
+    <div class="auth-container">
+        <h2>Bem-vindo de volta!</h2>
+        <form id="loginForm">
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="input-group">
+                <label for="senha">Senha</label>
+                <input type="password" id="senha" name="senha" required>
+            </div>
+            <button type="submit" class="auth-btn">Entrar</button>
+            <p id="errorMessage" class="error-message"></p>
+        </form>
+        <p class="auth-link">Não tem uma conta? <a href="cadastro.html">Cadastre-se</a></p>
+    </div>
+    <script src="auth_cliente.js"></script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Encomenda - Supermercado Veronesi</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kit.fontawesome.com/cc533e21e1.js" crossorigin="anonymous"></script>
+    <style>
+        .cart-section { padding-top: 40px; }
+        .cart-item {
+            display: flex;
+            align-items: center;
+            background-color: var(--surface-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+        }
+        .cart-item-img { width: 80px; height: 80px; object-fit: cover; border-radius: 5px; margin-right: 15px; }
+        .cart-item-info { flex-grow: 1; }
+        .cart-item-info h4 { margin-bottom: 5px; }
+        .cart-item-price { font-size: 1.1rem; color: var(--text-secondary); }
+        .cart-item-actions { display: flex; align-items: center; gap: 10px; }
+        .quantity-input { width: 50px; text-align: center; background-color: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 5px; padding: 5px; }
+        .remove-btn { background: none; border: none; color: var(--primary-red); font-size: 1.2rem; cursor: pointer; }
+        .cart-summary {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: var(--surface-color);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        .cart-summary h3 { margin-bottom: 15px; }
+        .total-price { font-size: 1.8rem; font-weight: bold; color: var(--primary-red); }
+        .checkout-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: var(--primary-blue);
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .checkout-btn:hover { background-color: #1565c0; }
+        .empty-cart-message { text-align: center; padding: 50px; }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <a href="index.html" style="text-decoration: none;"><h1 class="logo">Supermercado Veronesi</h1></a>
+            <nav class="main-nav">
+                <!-- O script.js irá preencher esta área -->
+            </nav>
+        </div>
+    </header>
+
+    <main class="container cart-section">
+        <h2><i class="fa-solid fa-cart-shopping"></i> Minha Encomenda</h2>
+        
+        <div id="cart-container">
+            <!-- Os itens da encomenda serão inseridos aqui pelo cart.js -->
+        </div>
+
+        <div id="cart-summary" class="cart-summary" style="display: none;">
+            <h3>Resumo do Pedido</h3>
+            <p>Valor Total: <span id="total-price" class="total-price">R$ 0,00</span></p>
+            <button id="checkout-btn" class="checkout-btn">Finalizar Encomenda</button>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+    <script src="cart.js"></script>
+</body>
+</html>

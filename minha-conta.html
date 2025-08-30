@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Conta - Supermercado Veronesi</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kit.fontawesome.com/cc533e21e1.js" crossorigin="anonymous"></script>
+    <style>
+        /* Estilos para o histórico de encomendas */
+        .order-history-container { margin-top: 30px; }
+        .order-card {
+            background-color: var(--surface-color);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background-color: rgba(0,0,0,0.2);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .order-header-info span { display: block; font-size: 0.9rem; color: var(--text-secondary); }
+        .order-header-info strong { color: var(--text-primary); }
+        .order-status {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            text-transform: capitalize;
+        }
+        /* Cores dos status (devem corresponder ao admin/style.css) */
+        .status-nova { background-color: rgba(30, 136, 229, 0.2); color: #1e88e5; }
+        .status-em_separacao { background-color: rgba(255, 167, 38, 0.2); color: #ffa726; }
+        .status-pronta { background-color: rgba(0, 200, 83, 0.2); color: #00c853; }
+        .status-retirada { background-color: rgba(118, 118, 118, 0.2); color: #767676; }
+        .status-cancelada { background-color: rgba(229, 57, 53, 0.2); color: #e53935; }
+
+        .order-body { padding: 15px; }
+        .order-item-list { list-style: none; padding: 0; }
+        .order-item { display: flex; align-items: center; gap: 15px; padding: 10px 0; border-bottom: 1px solid var(--border-color); }
+        .order-item:last-child { border-bottom: none; }
+        .order-item img { width: 50px; height: 50px; object-fit: cover; border-radius: 5px; }
+        .order-item-details { flex-grow: 1; }
+        .loading-spinner { text-align: center; padding: 40px; }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <a href="index.html" style="text-decoration: none;"><h1 class="logo">Supermercado Veronesi</h1></a>
+            <nav class="main-nav">
+                <!-- O script.js irá atualizar esta área -->
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <h2 style="padding-top: 40px;">Minha Conta</h2>
+        <p>Olá, <strong id="userName"></strong>!</p>
+        
+        <section class="order-history-container">
+            <h3>Seu Histórico de Encomendas</h3>
+            <div id="order-list">
+                <!-- O histórico de encomendas será renderizado aqui -->
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cliente = JSON.parse(sessionStorage.getItem('cliente'));
+            const userNameEl = document.getElementById('userName');
+            const orderListEl = document.getElementById('order-list');
+
+            if (cliente && cliente.nome_completo && cliente.id_cliente) {
+                userNameEl.textContent = cliente.nome_completo;
+                fetchOrderHistory(cliente.id_cliente);
+            } else {
+                // Se não estiver logado, redireciona para a página de login.
+                window.location.href = 'login.html';
+            }
+
+            async function fetchOrderHistory(clienteId) {
+                orderListEl.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
+                try {
+                    // **CORREÇÃO:** Caminho relativo para a API.
+                    const response = await fetch(`api/api_encomenda_historico.php?id_cliente=${clienteId}`);
+                    if (!response.ok) {
+                        throw new Error('Falha ao buscar o histórico.');
+                    }
+                    const orders = await response.json();
+                    renderOrderHistory(orders);
+                } catch (error) {
+                    orderListEl.innerHTML = `<p>Não foi possível carregar seu histórico. Tente novamente mais tarde.</p>`;
+                }
+            }
+
+            function renderOrderHistory(orders) {
+                if (!orders || orders.length === 0) {
+                    orderListEl.innerHTML = '<p>Você ainda não fez nenhuma encomenda.</p>';
+                    return;
+                }
+
+                orderListEl.innerHTML = ''; // Limpa o spinner de carregamento
+                orders.forEach(order => {
+                    const orderCard = document.createElement('div');
+                    orderCard.className = 'order-card';
+
+                    const formattedDate = new Date(order.data_encomenda).toLocaleString('pt-BR');
+                    const formattedTotal = parseFloat(order.valor_total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                    const statusText = order.status.replace('_', ' ');
+
+                    let itemsHtml = '<ul class="order-item-list">';
+                    order.encomenda_itens.forEach(item => {
+                        const productName = item.produtos ? item.produtos.nome : 'Produto indisponível';
+                        const imageUrl = item.produtos ? item.produtos.imagem_url : 'https://placehold.co/50x50';
+                        itemsHtml += `
+                            <li class="order-item">
+                                <img src="${imageUrl}" alt="${productName}" onerror="this.src='https://placehold.co/50x50/e53935/ffffff?text=X'">
+                                <div class="order-item-details">
+                                    <span>${item.quantidade}x ${productName}</span>
+                                </div>
+                            </li>
+                        `;
+                    });
+                    itemsHtml += '</ul>';
+
+                    orderCard.innerHTML = `
+                        <div class="order-header">
+                            <div class="order-header-info">
+                                <span>Encomenda</span>
+                                <strong>#${order.id_encomenda}</strong>
+                            </div>
+                            <div class="order-header-info">
+                                <span>Data</span>
+                                <strong>${formattedDate}</strong>
+                            </div>
+                            <div class="order-header-info">
+                                <span>Total</span>
+                                <strong>${formattedTotal}</strong>
+                            </div>
+                            <div class="order-status status-${order.status}">${statusText}</div>
+                        </div>
+                        <div class="order-body">
+                            ${itemsHtml}
+                        </div>
+                    `;
+                    orderListEl.appendChild(orderCard);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
