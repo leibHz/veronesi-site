@@ -1,4 +1,4 @@
-// ARQUIVO: script.js
+// ARQUIVO: script.js (CORRIGIDO E MELHORADO)
 document.addEventListener('DOMContentLoaded', () => {
     const productGrid = document.getElementById('product-grid');
     const searchInput = document.getElementById('searchInput');
@@ -10,10 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const SITE_INFO_API_URL = 'api/api_site_info.php';
 
     let queryParams = { q: '', promocao: false, ordenar: 'alfabetica_asc' };
+    let siteConfig = null; // Guarda a configuração do site
 
     // --- LÓGICA DE AUTENTICAÇÃO DO CABEÇALHO ---
-    // Alterado para localStorage para persistir o login
-    const cliente = JSON.parse(localStorage.getItem('cliente'));
+    const cliente = JSON.parse(sessionStorage.getItem('cliente'));
 
     if (cliente) {
         navContainer.innerHTML = `
@@ -26,8 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         document.getElementById('logoutBtn').addEventListener('click', (e) => {
             e.preventDefault();
-            localStorage.clear(); // Limpa toda a sessão (cliente e carrinho)
-            sessionStorage.clear(); // Limpa também o session storage por garantia
+            sessionStorage.clear();
             window.location.href = 'index.html';
         });
     } else {
@@ -40,7 +39,27 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     }
 
-    // --- LÓGICA DE PRODUTOS ---
+    // --- LÓGICA DE PRODUTOS E STATUS DA LOJA ---
+    const fetchSiteInfo = async () => {
+        try {
+            const response = await fetch(SITE_INFO_API_URL);
+            if (!response.ok) throw new Error('Falha ao buscar informações do site.');
+            siteConfig = await response.json();
+            displayStoreStatus(siteConfig);
+        } catch (error) {
+            console.error(error.message);
+        }
+    };
+
+    const displayStoreStatus = (config) => {
+        const banner = document.getElementById('store-status-banner');
+        if (!banner || !config) return;
+        
+        banner.textContent = config.mensagem_loja_real || (config.pode_encomendar ? 'Loja aberta!' : 'Loja fechada.');
+        banner.className = config.pode_encomendar ? 'status-aberto' : 'status-fechado';
+        banner.style.display = 'block';
+    };
+
     const fetchAndRenderProducts = async () => {
         if (!productGrid) return;
         showLoadingSpinner();
@@ -54,8 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(url);
             if (!response.ok) throw new Error('Não foi possível carregar os produtos.');
             const products = await response.json();
-            renderProducts(products);
-            fetchStoreStatus();
+            renderProducts(products, siteConfig);
         } catch (error) {
             productGrid.innerHTML = `<p class="error-message">${error.message}</p>`;
         }
@@ -65,12 +83,16 @@ document.addEventListener('DOMContentLoaded', () => {
         productGrid.innerHTML = '<div class="spinner"></div>';
     };
 
-    const renderProducts = (products) => {
+    const renderProducts = (products, config) => {
         productGrid.innerHTML = '';
         if (!products || products.length === 0) {
             productGrid.innerHTML = `<p class="no-results-message">Nenhum produto encontrado com os filtros atuais.</p>`;
             return;
         }
+
+        const podeEncomendar = config ? config.pode_encomendar : false;
+        const mensagemFechado = config ? config.mensagem_loja_real : 'Indisponível';
+
         products.forEach((product, index) => {
             const card = document.createElement('div');
             card.className = 'product-card';
@@ -78,47 +100,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const formattedPrice = parseFloat(product.preco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             const priceLabel = product.unidade_medida === 'kg' ? `${formattedPrice} / kg` : formattedPrice;
-            
-            let tagsHtml = '<div class="product-tags">';
-            if(product.tags && product.tags.length > 0) {
-                product.tags.forEach(tag => {
-                    tagsHtml += `<span class="tag">${tag.nome}</span>`;
-                });
-            }
-            tagsHtml += '</div>';
 
             card.innerHTML = `
                 ${product.em_promocao ? '<div class="promo-badge">OFERTA</div>' : ''}
                 <img src="${product.imagem_url || 'https://placehold.co/400x400'}" alt="${product.nome}" class="product-image" onerror="this.src='https://placehold.co/400x400/e53935/ffffff?text=X'">
                 <div class="product-info">
-                    ${tagsHtml}
                     <h3 class="product-name">${product.nome}</h3>
                     <p class="product-price" data-price="${product.preco}">${priceLabel}</p>
-                    <button class="add-to-cart-btn" data-id="${product.id_produto}">
-                       <i class="fa-solid fa-plus"></i> Adicionar
-                   </button>
+                    <button class="add-to-cart-btn ${!podeEncomendar ? 'disabled-btn' : ''}" 
+                            data-id="${product.id_produto}" 
+                            ${!podeEncomendar ? 'disabled' : ''}>
+                        ${podeEncomendar ? '<i class="fa-solid fa-plus"></i> Adicionar' : `<i class="fa-solid fa-ban"></i> ${mensagemFechado}`}
+                    </button>
                 </div>
             `;
             productGrid.appendChild(card);
         });
-    };
-
-    // --- LÓGICA DE STATUS DA LOJA ---
-    const fetchStoreStatus = async () => {
-        try {
-            const response = await fetch(SITE_INFO_API_URL);
-            const config = await response.json();
-
-            if (config && !config.encomendas_ativas) {
-                document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
-                    btn.disabled = true;
-                    btn.classList.add('disabled-btn');
-                    btn.innerHTML = `<i class="fa-solid fa-ban"></i> ${config.mensagem_encomendas || 'Indisponível'}`;
-                });
-            }
-        } catch (error) {
-            console.error("Erro ao buscar status da loja:", error);
-        }
     };
 
     // --- EVENT LISTENERS ---
@@ -162,8 +159,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- INICIALIZAÇÃO ---
-    fetchAndRenderProducts();
-    updateCartCounter();
+    const initPage = async () => {
+        await fetchSiteInfo();
+        await fetchAndRenderProducts();
+        updateCartCounter();
+    };
+
+    initPage();
 });
 
 // --- FUNÇÕES GLOBAIS DO CARRINHO ---

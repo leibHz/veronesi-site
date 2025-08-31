@@ -1,14 +1,13 @@
-// ARQUIVO: cart.js (CORRIGIDO)
+// ARQUIVO: cart.js (CORRIGIDO E MAIS SEGURO)
 document.addEventListener('DOMContentLoaded', () => {
     const cartContainer = document.getElementById('cart-container');
     const cartSummary = document.getElementById('cart-summary');
     const totalPriceEl = document.getElementById('total-price');
     const checkoutBtn = document.getElementById('checkout-btn');
 
-    // **CORREÇÃO:** Caminho relativo para a API, tornando o projeto mais portável.
     const API_CRIAR_ENCOMENDA = 'api/api_encomenda_criar.php';
+    const SITE_INFO_API_URL = 'api/api_site_info.php';
 
-    // Função para renderizar o carrinho na tela
     const renderCart = () => {
         const cart = JSON.parse(sessionStorage.getItem('cart')) || [];
         cartContainer.innerHTML = '';
@@ -45,30 +44,24 @@ document.addEventListener('DOMContentLoaded', () => {
         totalPriceEl.textContent = formatCurrency(total);
     };
 
-    // Função para formatar o valor como moeda brasileira
     const formatCurrency = (value) => {
         return parseFloat(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     };
 
-    // Lida com eventos no container do carrinho
     cartContainer.addEventListener('click', (e) => {
         const removeBtn = e.target.closest('.remove-btn');
         if (removeBtn) {
-            const id = removeBtn.dataset.id;
-            removeFromCart(id);
+            removeFromCart(removeBtn.dataset.id);
         }
     });
 
     cartContainer.addEventListener('change', (e) => {
         const quantityInput = e.target.closest('.quantity-input');
         if (quantityInput) {
-            const id = quantityInput.dataset.id;
-            const newQuantity = parseFloat(quantityInput.value);
-            updateQuantity(id, newQuantity);
+            updateQuantity(quantityInput.dataset.id, parseFloat(quantityInput.value));
         }
     });
     
-    // Funções de manipulação do carrinho
     const updateQuantity = (id, quantity) => {
         let cart = JSON.parse(sessionStorage.getItem('cart')) || [];
         const itemIndex = cart.findIndex(item => item.id == id);
@@ -88,14 +81,13 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCartCounter();
     };
     
-    // Finalizar a encomenda
     checkoutBtn.addEventListener('click', async () => {
         const cliente = JSON.parse(sessionStorage.getItem('cliente'));
         const cart = JSON.parse(sessionStorage.getItem('cart')) || [];
 
         if (!cliente) {
             alert('Você precisa estar logado para finalizar a encomenda.');
-            window.location.href = 'login.html?redirect=encomenda.html'; // Redireciona para o login
+            window.location.href = 'login.html?redirect=encomenda.html';
             return;
         }
 
@@ -103,17 +95,26 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Sua encomenda está vazia.');
             return;
         }
-
-        // Prepara os dados para enviar para a API
-        const orderData = {
-            id_cliente: cliente.id_cliente,
-            itens: cart.map(item => ({ id: item.id, quantity: item.quantity, price: item.price }))
-        };
         
         try {
             checkoutBtn.disabled = true;
-            checkoutBtn.textContent = 'Processando...';
+            checkoutBtn.textContent = 'Verificando...';
 
+            // 1. VERIFICA O STATUS DA LOJA ANTES DE ENVIAR O PEDIDO
+            const statusResponse = await fetch(SITE_INFO_API_URL);
+            const siteConfig = await statusResponse.json();
+
+            if (!siteConfig || !siteConfig.pode_encomendar) {
+                throw new Error(siteConfig.mensagem_loja_real || 'A loja está fechada para encomendas no momento.');
+            }
+
+            // 2. SE A LOJA ESTIVER ABERTA, PROSSEGUE
+            checkoutBtn.textContent = 'Processando...';
+            const orderData = {
+                id_cliente: cliente.id_cliente,
+                itens: cart.map(item => ({ id: item.id, quantity: item.quantity, price: item.price }))
+            };
+            
             const response = await fetch(API_CRIAR_ENCOMENDA, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -123,13 +124,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
             if (response.ok) {
                 alert('Encomenda realizada com sucesso!');
-                sessionStorage.removeItem('cart'); // Limpa o carrinho
-                window.location.href = 'minha-conta.html'; // Redireciona para o histórico
+                sessionStorage.removeItem('cart');
+                window.location.href = 'minha-conta.html';
             } else {
-                // Lança um erro com a mensagem vinda da API
                 throw new Error(result.message || 'Ocorreu um erro desconhecido.');
             }
-
         } catch (error) {
             alert(`Erro ao finalizar a encomenda: ${error.message}`);
             checkoutBtn.disabled = false;
@@ -137,6 +136,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Inicialização
     renderCart();
 });

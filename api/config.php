@@ -1,24 +1,28 @@
 <?php
-// ARQUIVO: api/config.php
+// ARQUIVO: api/config.php (MODIFICADO PARA USAR VARIÁVEIS DE AMBIENTE)
 // -----------------------------------------------------------------
-// Este arquivo agora contém as configurações para a API REST do Supabase.
-// A chave secreta (service_role) é usada aqui para operações de backend,
-// pois ela pode contornar as políticas de segurança de linha (RLS),
-// o que é necessário para um servidor de aplicação confiável.
+// As chaves de API e senhas foram removidas deste arquivo.
+// Agora, o sistema lê essas informações das variáveis de ambiente do servidor,
+// o que é uma prática de segurança muito mais robusta.
 
-// URL do seu projeto Supabase
+// URL do seu projeto Supabase (pode continuar aqui, não é um segredo)
 $supabase_url = 'https://atlevvcnquxtczsksuyv.supabase.co';
 
+// Chave pública do Supabase (pode continuar aqui, é segura para exposição no frontend)
 $supabase_publishable_key = 'sb_publishable_ZNV55bP_klSoZ6mB92YopQ_TIHjpRYO';
 
-// Chave de API Secreta (Service Role) - Mantenha esta chave segura e nunca a exponha no frontend.
-$supabase_secret_key = 'sb_secret_kntnItGKTuNhJkEBPZmOkw_HWPTTf3D'; 
+// --- LEITURA DAS CHAVES SECRETAS DAS VARIÁVEIS DE AMBIENTE ---
 
-// IMPORTANTE: Substitua os valores abaixo pelas suas credenciais de e-mail reais.
-// --- CONFIGURAÇÃO DE E-MAIL (PHPMailer) ---
-define('SMTP_HOST', 'smtp.gmail.com');
-define('SMTP_USERNAME', 'mercadoveronesi.naoresponda@gmail.com'); // Seu endereço de e-mail do Gmail
-define('SMTP_PASSWORD', 'dvqhczsarycfykpt'); // A senha que você vai gerar no passo 2
-define('SMTP_PORT', 587); // Porta para TLS
-define('SMTP_SECURE', 'tls'); // Segurança TLS
+// getenv() busca a variável de ambiente correspondente.
+// O operador '?:' define um valor padrão caso a variável não seja encontrada,
+// prevenindo erros, mas em produção, elas DEVEM estar definidas.
+$supabase_secret_key = getenv('SUPABASE_SECRET_KEY') ?: '';
+
+// --- CONFIGURAÇÃO DE E-MAIL (PHPMailer) LENDO DE VARIÁVEIS DE AMBIENTE ---
+define('SMTP_HOST', getenv('SMTP_HOST') ?: 'smtp.gmail.com');
+define('SMTP_USERNAME', getenv('SMTP_USERNAME') ?: '');
+define('SMTP_PASSWORD', getenv('SMTP_PASSWORD') ?: '');
+define('SMTP_PORT', getenv('SMTP_PORT') ?: 587);
+define('SMTP_SECURE', getenv('SMTP_SECURE') ?: 'tls');
+
 ?>
