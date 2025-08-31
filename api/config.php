@@ -14,4 +14,11 @@ $supabase_publishable_key = 'sb_publishable_ZNV55bP_klSoZ6mB92YopQ_TIHjpRYO';
 // Chave de API Secreta (Service Role) - Mantenha esta chave segura e nunca a exponha no frontend.
 $supabase_secret_key = 'sb_secret_kntnItGKTuNhJkEBPZmOkw_HWPTTf3D'; 
 
+// IMPORTANTE: Substitua os valores abaixo pelas suas credenciais de e-mail reais.
+// --- CONFIGURAÇÃO DE E-MAIL (PHPMailer) ---
+define('SMTP_HOST', 'smtp.gmail.com');
+define('SMTP_USERNAME', 'mercadoveronesi.naoresponda@gmail.com'); // Seu endereço de e-mail do Gmail
+define('SMTP_PASSWORD', 'dvqhczsarycfykpt'); // A senha que você vai gerar no passo 2
+define('SMTP_PORT', 587); // Porta para TLS
+define('SMTP_SECURE', 'tls'); // Segurança TLS
 ?>

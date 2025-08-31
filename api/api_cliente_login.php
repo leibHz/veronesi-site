@@ -1,5 +1,5 @@
 <?php
-// ARQUIVO: api/api_cliente_login.php (CRIE ESTE NOVO ARQUIVO)
+// ARQUIVO: api/api_cliente_login.php
 require 'config.php';
 
 header("Access-Control-Allow-Origin: *");
@@ -14,7 +14,7 @@ if (!isset($data->email) || !isset($data->senha)) {
     exit();
 }
 
-$endpoint = $supabase_url . '/rest/v1/clientes?select=id_cliente,nome_completo,senha_hash&email=eq.' . urlencode($data->email) . '&limit=1';
+$endpoint = $supabase_url . '/rest/v1/clientes?select=id_cliente,nome_completo,senha_hash,email_verificado&email=eq.' . urlencode($data->email) . '&limit=1';
 $ch = curl_init($endpoint);
 $headers = ['apikey: ' . $supabase_secret_key, 'Authorization: Bearer ' . $supabase_secret_key];
 
@@ -33,8 +33,15 @@ if ($httpcode !== 200) {
 $clientes = json_decode($response, true);
 
 if (count($clientes) > 0 && password_verify($data->senha, $clientes[0]['senha_hash'])) {
+    
+    // Verifica se o email foi confirmado
+    if (!$clientes[0]['email_verificado']) {
+        http_response_code(403); // Forbidden
+        echo json_encode(['message' => 'Sua conta ainda não foi verificada. Por favor, verifique seu e-mail.']);
+        exit();
+    }
+
     http_response_code(200);
-    // Retorna os dados do cliente para serem salvos no frontend
     echo json_encode([
         'status' => 'success',
         'message' => 'Login bem-sucedido!',

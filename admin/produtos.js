@@ -1,6 +1,5 @@
-// ARQUIVO: admin/produtos.js (COMPLETO E CORRIGIDO)
-// **CORREÇÃO CRÍTICA:** A função renderProducts foi reescrita para garantir
-// que os botões de ação sejam sempre criados corretamente.
+// ARQUIVO: admin/produtos.js (ATUALIZADO)
+// Adicionado suporte para promoções e tags.
 document.addEventListener('DOMContentLoaded', () => {
     const API_URL = '../api/api_admin_produtos.php';
     const tableBody = document.getElementById('productsTableBody');
@@ -43,22 +42,20 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         products.forEach(p => {
+            const tagsHtml = p.tags.map(tag => `<span class="tag-admin">${tag.nome}</span>`).join(' ');
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td><span class="status ${p.disponivel ? 'status-disponivel' : 'status-indisponivel'}">
                     ${p.disponivel ? 'Sim' : 'Não'}
                 </span></td>
-                <td>${p.nome}</td>
+                <td>${p.nome} ${p.em_promocao ? '<span class="promo-tag-list">Promo</span>' : ''}</td>
                 <td>R$ ${parseFloat(p.preco).toFixed(2)}</td>
-                <td>${p.unidade_medida}</td>
+                <td>${tagsHtml || 'N/A'}</td>
                 <td>${p.sessao?.nome || 'N/A'}</td>
-                <!-- Célula de ações será preenchida pelo JS -->
                 <td class="actions-cell"></td>
             `;
 
-            // **AQUI ESTÁ A CORREÇÃO:** Cria os botões e adiciona na célula de ações
             const actionsCell = row.querySelector('.actions-cell');
-            
             const editBtn = document.createElement('button');
             editBtn.className = 'edit-btn';
             editBtn.dataset.id = p.id_produto;
@@ -71,7 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             actionsCell.appendChild(editBtn);
             actionsCell.appendChild(deleteBtn);
-
             tableBody.appendChild(row);
         });
     };
@@ -80,6 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
         productForm.reset();
         imagePreviewContainer.style.display = 'none';
         document.getElementById('disponivel').checked = true;
+        document.getElementById('em_promocao').checked = false;
 
         if (product) {
             modalTitle.textContent = 'Editar Produto';
@@ -90,7 +87,9 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('descricao').value = product.descricao;
             document.getElementById('unidade_medida').value = product.unidade_medida;
             document.getElementById('disponivel').checked = product.disponivel;
-            
+            document.getElementById('em_promocao').checked = product.em_promocao;
+            document.getElementById('tags').value = product.tags.map(t => t.nome).join(', ');
+
             if (product.imagem_url) {
                 document.getElementById('imagem_atual').value = product.imagem_url;
                 imagePreview.src = `../${product.imagem_url}`;
@@ -102,9 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.style.display = 'block';
     };
 
-    const closeModal = () => {
-        modal.style.display = 'none';
-    };
+    const closeModal = () => modal.style.display = 'none';
 
     addProductBtn.addEventListener('click', () => openModal());
     closeBtns.forEach(btn => btn.addEventListener('click', closeModal));
@@ -129,17 +126,12 @@ document.addEventListener('DOMContentLoaded', () => {
     tableBody.addEventListener('click', async (e) => {
         const targetButton = e.target.closest('button');
         if (!targetButton) return;
-
         const id = targetButton.dataset.id;
 
         if (targetButton.classList.contains('edit-btn')) {
             const response = await fetch(`${API_URL}?id=${id}`);
             const product = await response.json();
-            if (product) {
-                openModal(product);
-            } else {
-                alert('Produto não encontrado.');
-            }
+            openModal(product || null);
         }
 
         if (targetButton.classList.contains('delete-btn')) {
@@ -150,11 +142,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify({ id_produto: id })
                 });
                 const result = await response.json();
-                if (result.status === 'success') {
-                    fetchProducts();
-                } else {
-                    alert(result.message);
-                }
+                if (result.status === 'success') fetchProducts();
+                else alert(result.message);
             }
         }
     });

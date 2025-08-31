@@ -44,6 +44,11 @@ if ($method === 'PATCH') {
 
     $id = $data->id_encomenda;
     $payload = ['status' => $data->status];
+
+    // Adiciona a justificativa ao payload se ela existir
+    if (isset($data->justificativa_cancelamento)) {
+        $payload['justificativa_cancelamento'] = $data->justificativa_cancelamento;
+    }
     
     $endpoint = $supabase_url . '/rest/v1/encomendas?id_encomenda=eq.' . $id;
     $opts = ['http' => [

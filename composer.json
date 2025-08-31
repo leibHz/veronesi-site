@@ -1,0 +1,7 @@
+{
+    "name": "veronesi/supermercado",
+    "description": "Sistema de encomendas para o Supermercado Veronesi.",
+    "require": {
+        "phpmailer/phpmailer": "^6.9"
+    }
+}

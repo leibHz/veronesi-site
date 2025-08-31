@@ -1,20 +1,19 @@
-// ARQUIVO: script.js (CORRIGIDO)
+// ARQUIVO: script.js
 document.addEventListener('DOMContentLoaded', () => {
-
     const productGrid = document.getElementById('product-grid');
     const searchInput = document.getElementById('searchInput');
     const promoFilter = document.getElementById('promoFilter');
     const sortOptions = document.getElementById('sortOptions');
     const navContainer = document.querySelector('.main-nav');
 
-    // **CORREÇÃO:** Caminhos relativos para as APIs, tornando o projeto mais portável.
     const API_URL = 'api/api_produtos.php';
     const SITE_INFO_API_URL = 'api/api_site_info.php';
 
     let queryParams = { q: '', promocao: false, ordenar: 'alfabetica_asc' };
 
     // --- LÓGICA DE AUTENTICAÇÃO DO CABEÇALHO ---
-    const cliente = JSON.parse(sessionStorage.getItem('cliente'));
+    // Alterado para localStorage para persistir o login
+    const cliente = JSON.parse(localStorage.getItem('cliente'));
 
     if (cliente) {
         navContainer.innerHTML = `
@@ -27,7 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         document.getElementById('logoutBtn').addEventListener('click', (e) => {
             e.preventDefault();
-            sessionStorage.clear(); // Limpa toda a sessão (cliente e carrinho)
+            localStorage.clear(); // Limpa toda a sessão (cliente e carrinho)
+            sessionStorage.clear(); // Limpa também o session storage por garantia
             window.location.href = 'index.html';
         });
     } else {
@@ -45,7 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!productGrid) return;
         showLoadingSpinner();
 
-        // Constrói a URL com os parâmetros de busca
         const url = new URL(API_URL, window.location.href);
         if (queryParams.q) url.searchParams.set('q', queryParams.q);
         if (queryParams.promocao) url.searchParams.set('promocao', 'true');
@@ -56,7 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('Não foi possível carregar os produtos.');
             const products = await response.json();
             renderProducts(products);
-            // Após renderizar, busca o status da loja para habilitar/desabilitar botões
             fetchStoreStatus();
         } catch (error) {
             productGrid.innerHTML = `<p class="error-message">${error.message}</p>`;
@@ -80,11 +78,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const formattedPrice = parseFloat(product.preco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             const priceLabel = product.unidade_medida === 'kg' ? `${formattedPrice} / kg` : formattedPrice;
+            
+            let tagsHtml = '<div class="product-tags">';
+            if(product.tags && product.tags.length > 0) {
+                product.tags.forEach(tag => {
+                    tagsHtml += `<span class="tag">${tag.nome}</span>`;
+                });
+            }
+            tagsHtml += '</div>';
 
             card.innerHTML = `
-                <img src="${product.imagem_url || 'https://placehold.co/400x400'}" alt="${product.nome}" class="product-image" onerror="this.src='https://placehold.co/400x400/e53935/ffffff?text=Imagem'">
+                ${product.em_promocao ? '<div class="promo-badge">OFERTA</div>' : ''}
+                <img src="${product.imagem_url || 'https://placehold.co/400x400'}" alt="${product.nome}" class="product-image" onerror="this.src='https://placehold.co/400x400/e53935/ffffff?text=X'">
                 <div class="product-info">
-                    <span class="product-session">${product.sessao?.nome || 'Sem Categoria'}</span>
+                    ${tagsHtml}
                     <h3 class="product-name">${product.nome}</h3>
                     <p class="product-price" data-price="${product.preco}">${priceLabel}</p>
                     <button class="add-to-cart-btn" data-id="${product.id_produto}">
@@ -122,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
             searchTimeout = setTimeout(() => {
                 queryParams.q = searchInput.value;
                 fetchAndRenderProducts();
-            }, 300); // Debounce para não fazer uma requisição a cada tecla digitada
+            }, 300);
         });
     }
     if (promoFilter) {
@@ -155,8 +162,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- INICIALIZAÇÃO ---
-    fetchAndRenderProducts(); // Busca os produtos na página principal
-    updateCartCounter(); // Atualiza o contador do carrinho no cabeçalho
+    fetchAndRenderProducts();
+    updateCartCounter();
 });
 
 // --- FUNÇÕES GLOBAIS DO CARRINHO ---
@@ -181,7 +188,7 @@ function showAddedToCartFeedback(productId) {
     if (btn) {
         const originalText = btn.innerHTML;
         btn.innerHTML = `<i class="fa-solid fa-check"></i> Adicionado!`;
-        btn.style.backgroundColor = '#00c853'; // Verde
+        btn.style.backgroundColor = 'var(--success-green)';
         setTimeout(() => {
             btn.innerHTML = originalText;
             btn.style.backgroundColor = '';

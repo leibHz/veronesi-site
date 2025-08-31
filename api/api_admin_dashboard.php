@@ -1,55 +1,43 @@
 <?php
-// ARQUIVO: api/api_admin_dashboard.php
-// -----------------------------------------------------------------
-// Busca dados para preencher o dashboard.
+// ARQUIVO: api/api_admin_dashboard.php (ATUALIZADO)
+// Utiliza PDO para uma contagem de registros mais confiável e direta.
 
-require 'config.php';
+require 'config_pdo.php'; // Usa a conexão PDO
 
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 
-// Função para fazer requisições GET com contagem (count)
-function getCount($table, $supabase_url, $supabase_secret_key) {
-    // Usamos o header 'Prefer: count=exact' para obter o total de registros
-    $endpoint = $supabase_url . '/rest/v1/' . $table . '?select=';
-    
-    $ch = curl_init($endpoint);
-    $headers = [
-        'apikey: ' . $supabase_secret_key,
-        'Authorization: Bearer ' . $supabase_secret_key,
-        'Prefer: count=exact'
+try {
+    // Função para contar registros em uma tabela usando a conexão PDO
+    function getCount($pdo, $table) {
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM public.{$table}");
+        $stmt->execute();
+        return $stmt->fetchColumn();
+    }
+
+    // Busca as contagens de cada tabela
+    $total_produtos = getCount($pdo, 'produtos');
+    $total_clientes = getCount($pdo, 'clientes');
+    $total_encomendas = getCount($pdo, 'encomendas');
+
+    // Monta o array de resposta
+    $stats = [
+        'total_produtos' => (int)$total_produtos,
+        'total_clientes' => (int)$total_clientes,
+        'total_encomendas' => (int)$total_encomendas
     ];
 
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    // CURLOPT_HEADER => true para pegar os cabeçalhos da resposta
-    curl_setopt($ch, CURLOPT_HEADER, true);
+    // Retorna os dados em JSON
+    http_response_code(200);
+    echo json_encode($stats);
 
-    $response = curl_exec($ch);
-    $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    if ($httpcode !== 200) return 0;
-
-    // Extrai o 'Content-Range' do cabeçalho da resposta
-    preg_match('/Content-Range: \d+-\d+\/(\d+)/', $response, $matches);
-    
-    return isset($matches[1]) ? (int)$matches[1] : 0;
+} catch (PDOException $e) {
+    // Em caso de erro na consulta, retorna uma resposta de erro genérica
+    http_response_code(500);
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Erro ao buscar estatísticas do banco de dados.',
+        'debug_info' => $e->getMessage() // Opcional: para depuração
+    ]);
 }
-
-// Busca as contagens de cada tabela
-$total_produtos = getCount('produtos', $supabase_url, $supabase_secret_key);
-$total_clientes = getCount('clientes', $supabase_url, $supabase_secret_key);
-$total_encomendas = getCount('encomendas', $supabase_url, $supabase_secret_key);
-
-// Monta o array de resposta
-$stats = [
-    'total_produtos' => $total_produtos,
-    'total_clientes' => $total_clientes,
-    'total_encomendas' => $total_encomendas
-];
-
-// Retorna os dados em JSON
-echo json_encode($stats);
-
 ?>

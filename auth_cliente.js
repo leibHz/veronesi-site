@@ -1,4 +1,4 @@
-// ARQUIVO: auth_cliente.js (CRIE ESTE NOVO ARQUIVO na pasta raiz)
+// ARQUIVO: auth_cliente.js
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
     const cadastroForm = document.getElementById('cadastroForm');
@@ -23,8 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = await response.json();
 
                 if (response.ok) {
-                    // Salva os dados do cliente no sessionStorage
-                    sessionStorage.setItem('cliente', JSON.stringify(result.cliente));
+                    // Salva os dados do cliente no localStorage para persistir a sessão
+                    localStorage.setItem('cliente', JSON.stringify(result.cliente));
                     window.location.href = 'index.html'; // Redireciona para a página principal
                 } else {
                     errorMessageEl.textContent = result.message;
@@ -45,6 +45,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const formData = new FormData(cadastroForm);
             const data = Object.fromEntries(formData.entries());
 
+            if (data.senha !== data.confirmar_senha) {
+                errorMessageEl.textContent = 'As senhas não coincidem.';
+                return;
+            }
+
             try {
                 const response = await fetch('api/api_cliente_cadastro.php', {
                     method: 'POST',
@@ -55,8 +60,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = await response.json();
 
                 if (response.ok) {
-                    alert('Cadastro realizado com sucesso! Você será redirecionado para a página de login.');
-                    window.location.href = 'login.html';
+                    // Guarda o email para a página de verificação
+                    sessionStorage.setItem('email_para_verificacao', data.email);
+                    window.location.href = 'verificacao.html';
                 } else {
                     errorMessageEl.textContent = result.message;
                 }

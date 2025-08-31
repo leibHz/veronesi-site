@@ -7,6 +7,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const orderDetailsContainer = document.getElementById('orderDetails');
     const statusSelect = document.getElementById('statusSelect');
     const saveStatusBtn = document.getElementById('saveStatusBtn');
+    
+    // Elementos da justificativa
+    const justificativaContainer = document.getElementById('justificativaContainer');
+    const justificativaInput = document.getElementById('justificativaInput');
+
     let currentOrderId = null;
 
     const fetchOrders = async () => {
@@ -34,7 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td>R$ ${parseFloat(order.valor_total).toFixed(2)}</td>
                     <td><span class="status status-${order.status}">${order.status.replace('_', ' ')}</span></td>
                     <td class="actions-cell">
-                        <!-- ÍCONE DO BOTÃO DE VISUALIZAR TROCADO -->
                         <button class="view-btn" data-id="${order.id_encomenda}"><i class="fa-solid fa-pencil"></i></button>
                     </td>
                 </tr>
@@ -56,7 +60,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             orderIdSpan.textContent = order.id_encomenda;
             statusSelect.value = order.status;
+            justificativaInput.value = order.justificativa_cancelamento || ''; // Limpa ou preenche a justificativa
             
+            // Mostra ou esconde o campo de justificativa baseado no status inicial
+            justificativaContainer.style.display = order.status === 'cancelada' ? 'block' : 'none';
+
             let detailsHtml = `
                 <p><strong>Cliente:</strong> ${order.clientes?.nome_completo || 'N/A'}</p>
                 <p><strong>Data:</strong> ${new Date(order.data_encomenda).toLocaleString('pt-BR')}</p>
@@ -85,11 +93,28 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!currentOrderId) return;
         
         const newStatus = statusSelect.value;
+        const justificativa = justificativaInput.value;
+
+        if (newStatus === 'cancelada' && !justificativa.trim()) {
+            alert('Por favor, forneça uma justificativa para o cancelamento.');
+            justificativaInput.focus();
+            return;
+        }
+
+        const payload = {
+            id_encomenda: currentOrderId,
+            status: newStatus
+        };
+
+        if (newStatus === 'cancelada') {
+            payload.justificativa_cancelamento = justificativa;
+        }
+
         try {
             const response = await fetch(API_URL, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id_encomenda: currentOrderId, status: newStatus })
+                body: JSON.stringify(payload)
             });
             const result = await response.json();
             if (result.status === 'success') {
@@ -102,6 +127,15 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Erro ao atualizar status: ' + error.message);
         }
     };
+
+    // Listener para mostrar/esconder campo de justificativa
+    statusSelect.addEventListener('change', () => {
+        if (statusSelect.value === 'cancelada') {
+            justificativaContainer.style.display = 'block';
+        } else {
+            justificativaContainer.style.display = 'none';
+        }
+    });
 
     tableBody.addEventListener('click', (e) => {
         const viewBtn = e.target.closest('.view-btn');

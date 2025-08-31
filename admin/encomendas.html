@@ -15,15 +15,13 @@
                 <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></a>
                 <a href="encomendas.html" class="nav-item active"><i class="fa-solid fa-box-archive"></i><span>Encomendas</span></a>
                 <a href="produtos.html" class="nav-item"><i class="fa-solid fa-tags"></i><span>Produtos</span></a>
-                <a href="#" class="nav-item"><i class="fa-solid fa-users"></i><span>Clientes</span></a>
-                <!-- CORREÇÃO: Link para a página de configurações -->
+                <a href="clientes.html" class="nav-item"><i class="fa-solid fa-users"></i><span>Clientes</span></a>
                 <a href="configuracoes.html" class="nav-item"><i class="fa-solid fa-gear"></i><span>Configurações</span></a>
             </nav>
         </aside>
 
         <main class="main-content">
             <header class="content-header">
-                <!-- BOTÃO DE MENU RESPONSIVO -->
                 <button class="menu-toggle"><i class="fa-solid fa-bars"></i></button>
                 <h2>Gerenciar Encomendas</h2>
             </header>
@@ -67,6 +65,11 @@
                         <option value="cancelada">Cancelada</option>
                     </select>
                 </div>
+                <!-- Campo de Justificativa, escondido por padrão -->
+                <div id="justificativaContainer" class="input-group" style="margin-top: 15px; display: none;">
+                    <label for="justificativaInput">Motivo do Cancelamento (Obrigatório)</label>
+                    <textarea id="justificativaInput" rows="3" placeholder="Informe ao cliente por que a encomenda foi cancelada."></textarea>
+                </div>
             </div>
             <footer class="modal-footer">
                 <button type="button" class="btn-secondary close-btn">Fechar</button>
@@ -77,7 +80,6 @@
 
     <script src="auth.js"></script>
     <script src="encomendas.js"></script>
-    <!-- SCRIPT DO MENU RESPONSIVO -->
     <script>
         document.querySelector('.menu-toggle').addEventListener('click', () => {
             document.querySelector('.sidebar').classList.toggle('open');

@@ -19,8 +19,7 @@
                 <input type="text" id="searchInput" placeholder="O que você procura?">
             </div>
             <nav class="main-nav">
-                <a href="#" class="nav-link"><i class="fa-solid fa-right-to-bracket"></i> Entrar</a>
-                <a href="#" class="nav-link cart-link"><i class="fa-solid fa-cart-shopping"></i> Encomenda</a>
+                <!-- Conteúdo dinâmico via script.js -->
             </nav>
         </div>
     </header>
@@ -29,6 +28,7 @@
         <!-- Banner Principal -->
         <section class="hero-banner">
             <div class="hero-overlay">
+                <h1>Supermercado Veronesi</h1>
                 <h2>Ofertas da Semana</h2>
                 <p>Produtos frescos e de qualidade com preços que cabem no seu bolso.</p>
             </div>
@@ -54,9 +54,17 @@
             </div>
         </section>
 
-        <!-- Grade de Produtos (Será preenchida pelo JavaScript) -->
+        <!-- Grade de Produtos -->
         <section id="product-grid" class="product-grid">
             <!-- O Spinner de carregamento será exibido aqui -->
+        </section>
+
+        <!-- Seção de Localização -->
+        <section id="location-section" class="location-section">
+            <h2>Nossa Localização</h2>
+            <div class="map-container">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3671.933333333333!2d-46.54305555555556!3d-22.99027777777778!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94cec90f77777777%3A0x3f3f3f3f3f3f3f3f!2sSupermercado%20Veronesi!5e0!3m2!1spt-BR!2sbr!4v1724600000000!5m2!1spt-BR!2sbr" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
         </section>
     </main>
 
@@ -67,12 +75,20 @@
             <div class="social-links">
                 <a href="#"><i class="fa-brands fa-instagram"></i></a>
                 <a href="#"><i class="fa-brands fa-facebook"></i></a>
-                <a href="#"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="https://wa.me/5511999999999" target="_blank" title="Suporte via WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
             </div>
         </div>
     </footer>
+
+    <!-- Botão Flutuante de Suporte -->
+    <a href="https://wa.me/5511999999999" class="support-float" target="_blank">
+        <i class="fa-brands fa-whatsapp"></i>
+        <span>Suporte</span>
+    </a>
 
     <!-- Script principal -->
     <script src="script.js"></script>
 </body>
 </html>
+
+

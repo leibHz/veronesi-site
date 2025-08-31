@@ -32,8 +32,12 @@
                 <input type="email" id="email" name="email" required>
             </div>
             <div class="input-group">
-                <label for="senha">Senha</label>
+                <label for="senha">Senha (mínimo 6 caracteres)</label>
                 <input type="password" id="senha" name="senha" required minlength="6">
+            </div>
+            <div class="input-group">
+                <label for="confirmar_senha">Confirmar Senha</label>
+                <input type="password" id="confirmar_senha" name="confirmar_senha" required minlength="6">
             </div>
             <button type="submit" class="auth-btn">Cadastrar</button>
             <p id="errorMessage" class="error-message"></p>
