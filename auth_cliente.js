@@ -1,4 +1,4 @@
-// ARQUIVO: auth_cliente.js
+// ARQUIVO: auth_cliente.js (COM TRATAMENTO DE ERRO MELHORADO)
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
     const cadastroForm = document.getElementById('cadastroForm');
@@ -10,27 +10,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const errorMessageEl = document.getElementById('errorMessage');
             errorMessageEl.textContent = '';
 
-            const formData = new FormData(loginForm);
-            const data = Object.fromEntries(formData.entries());
-
             try {
                 const response = await fetch('api/api_cliente_login.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify(Object.fromEntries(new FormData(loginForm).entries()))
                 });
-
                 const result = await response.json();
+                if (!response.ok) throw result;
 
-                if (response.ok) {
-                    // Salva os dados do cliente no localStorage para persistir a sessão
-                    localStorage.setItem('cliente', JSON.stringify(result.cliente));
-                    window.location.href = 'index.html'; // Redireciona para a página principal
-                } else {
-                    errorMessageEl.textContent = result.message;
-                }
+                sessionStorage.setItem('cliente', JSON.stringify(result.cliente));
+                window.location.href = 'index.html';
             } catch (error) {
-                errorMessageEl.textContent = 'Erro de conexão. Tente novamente.';
+                errorMessageEl.textContent = error.message || 'Erro de conexão. Tente novamente.';
             }
         });
     }
@@ -41,7 +33,6 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const errorMessageEl = document.getElementById('errorMessage');
             errorMessageEl.textContent = '';
-
             const formData = new FormData(cadastroForm);
             const data = Object.fromEntries(formData.entries());
 
@@ -57,18 +48,33 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify(data)
                 });
 
+                // Tenta analisar a resposta como JSON, independentemente do status
                 const result = await response.json();
 
-                if (response.ok) {
-                    // Guarda o email para a página de verificação
-                    sessionStorage.setItem('email_para_verificacao', data.email);
-                    window.location.href = 'verificacao.html';
-                } else {
-                    errorMessageEl.textContent = result.message;
+                // Se a resposta NÃO for OK (ex: erro 409, 500), lança o erro com a mensagem da API
+                if (!response.ok) {
+                    throw result;
                 }
+
+                // Se a resposta for OK
+                sessionStorage.setItem('email_para_verificacao', data.email);
+                window.location.href = 'verificacao.html';
+
             } catch (error) {
-                errorMessageEl.textContent = 'Erro de conexão. Tente novamente.';
+                // Agora, o 'error' pode ser o objeto JSON da API ou um erro de rede
+                console.error('Falha no cadastro - Detalhes:', error);
+                // Se o erro tiver uma mensagem (vindo da API), mostra-a. Senão, mostra a mensagem genérica.
+                let displayMessage = 'Ocorreu um erro. Tente novamente.';
+                if (error && error.message) {
+                    displayMessage = error.message;
+                    // Se houver detalhes extras (como no erro crítico), adiciona-os para depuração
+                    if (error.error_details) {
+                        displayMessage += ` (Detalhe: ${error.error_details})`;
+                    }
+                }
+                errorMessageEl.textContent = displayMessage;
             }
         });
     }
 });
+
